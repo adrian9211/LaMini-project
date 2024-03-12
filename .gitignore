@@ -121,3 +121,9 @@ cython_debug/
 /LaMini-Flan-T5-248M
 
 /LaMini-Flan-T5-248M/
+
+
+# IDE - specific files
+.idea/
+.vscode/
+/.idea/
