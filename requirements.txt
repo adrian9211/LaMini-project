@@ -12,3 +12,5 @@ fastapi
 uvicorn
 python-multipart
 aiofiles
+python-pptx
+pdf2image
