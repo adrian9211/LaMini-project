@@ -10,6 +10,7 @@ from transformers import PegasusTokenizer, PegasusForConditionalGeneration
 from sentence_transformers import SentenceTransformer, util
 
 
+
 # MODEL and TOKENIZER
 checkpoint = "LaMini-Flan-T5-248M"
 tokenizer = T5Tokenizer.from_pretrained(checkpoint)
@@ -48,21 +49,6 @@ def LLM_Pipeline(filepath):
   result = result[0]['summary_text']
   return result
 
-@st.cache_data
-#function to display the pdf of a given file
-def displayPPTX(file):
-    # Opening file from file path
-    with open(file, "rb") as f:
-        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-
-    # Embedding PPTX in HTML
-    pptx_display = F'<embed src="data:application/pptx;base64,{base64_pdf}" width="700" height="1000" type="application/pptx">'
-
-    # Displaying File
-    st.markdown(pptx_display, unsafe_allow_html=True)
-
-#Streamlit code
-# st.set_page_config(layout='wide', page_title="PPTX Summarizer")
 
 def summarize_and_display_result():
   uploaded_file = st.file_uploader("Upload your PPTX File", type=['pptx'])
@@ -81,8 +67,8 @@ def main():
   st.title('Legal-Pythia')
   st.subheader('Online PPTX Summarizer')
 
-  selected_data_model = st.selectbox("Choose Data Model", ["LaMini-Flan-T5-248M",
-                                                           "all-MiniLM-L6-v2",
+  selected_data_model = st.selectbox("Choose Data Model", ["all-MiniLM-L6-v2",
+                                                           "LaMini-Flan-T5-248M",
                                                            "all-distilroberta-v1",
                                                            "paraphrase-MiniLM-L6-v2",
                                                            "paraphrase-albert-small-v2",
@@ -93,8 +79,7 @@ def main():
     summarize_and_display_result()
   elif selected_data_model == "all-MiniLM-L6-v2":
     st.write("You have selected all-MiniLM-L6-v2")
-    # Summarisation pipeline
-    summariser = pipeline("summarization", model="facebook/bart-large-cnn")
+
 
     # Model for text embeddings
     model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -111,7 +96,7 @@ def main():
     def summarise_text(text):
       summary = summariser(
         text,
-        max_length=100,
+        max_length=300,
         min_length=25,
         length_penalty=2.0,
         num_beams=4,
@@ -149,8 +134,6 @@ def main():
 
       return topic_texts
 
-    # Streamlit app
-    st.title('PPT Summariser')
 
     uploaded_file = st.file_uploader("Choose a PPT file", type="pptx")
     if uploaded_file is not None:
@@ -172,53 +155,34 @@ def main():
       text = extract_text_from_ppt(uploaded_file)
       topic_texts = find_relevant_text_by_topic(uploaded_file, topic_keywords)
 
-      def load_pegasus_tokenizer():
-        pegasus_tokenizer = PegasusTokenizer.from_pretrained("google/pegasus-xsum")
-        return pegasus_tokenizer
+      tab1, tab2 = st.tabs(["Full Document Summary", "Topic Summary"])
 
-      def load_pegasus_model():
-        pegasus_model = PegasusForConditionalGeneration.from_pretrained("google/pegasus-xsum")
-        return pegasus_model
+      with tab1:
 
-      tok = load_pegasus_tokenizer()
-      model = load_pegasus_model()
-
-      # PEGASUS Summarization function
-      def pegasus_summarize(text):
-        batch = tok.prepare_seq2seq_batch(src_texts=[text])
-        # Hyperparameter Tuning
-        gen = model.generate(
-          **batch, max_length=10,  # max length of summary
-          min_length=5,  # min length of summary
-          do_sample=True,
-          temperature=3.0,
-          top_k=30,
-          top_p=0.70,
-          repetition_penalty=1.2,
-          length_penalty=5,  # if more than 1 encourage model to generate #larger sequences
-          num_return_sequences=1)  # no of summary you want to generate
-        # for forward pass: model(**batch)
-        summary = tok.batch_decode(gen, skip_special_tokens=True)
-        print(summary)
-
-        st.write(summary)
-
-      # Summarise the full document
-      if st.button('Generate Full Document Summary'):
-        full_summary = pegasus_summarize(text)
+        # Summarise the full document
+        # Model selection
+        model_options = ["sshleifer/distilbart-cnn-12-6", "google/pegasus-xsum", "t5-small",
+                         "facebook/bart-large-cnn"]
+        model_choice = st.selectbox("Select Model", model_options)
+        summariser = pipeline("summarization", model=model_choice)
+        full_summary = summarise_text(text)
         st.write(full_summary)
 
-      # Topic based summarisation
-      topic = st.selectbox('Choose a topic to summarise', ['Select a topic...'] + list(topic_keywords.keys()))
 
-      if st.button('Generate Topic Summary'):
-        if topic != 'Select a topic...':
-          topic_text = topic_texts.get(topic, "This topic was not found in the presentation.")
-          if "was not found" in topic_text:
-            st.write(topic_text)
-          else:
-            topic_summary = summarise_text(topic_text)
-            st.write(topic_summary)
+      with tab2:
+
+        # Topic based summarisation
+        topic = st.selectbox('Choose a topic to summarise', ['Select a topic...'] + list(topic_keywords.keys()))
+
+
+        if st.button('Generate Topic Summary'):
+          if topic != 'Select a topic...':
+            topic_text = topic_texts.get(topic, "This topic was not found in the presentation.")
+            if "was not found" in topic_text:
+              st.write(topic_text)
+            else:
+              topic_summary = summarise_text(topic_text)
+              st.write(topic_summary)
 
 
 
