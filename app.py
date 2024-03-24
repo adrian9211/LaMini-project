@@ -10,7 +10,15 @@ from transformers import PegasusTokenizer, PegasusForConditionalGeneration
 from sentence_transformers import SentenceTransformer, util
 
 
-
+def data_models():
+  selected_data_model = st.selectbox("Choose Data Model", ["all-MiniLM-L6-v2",
+                                                           "LaMini-Flan-T5-248M",
+                                                           "all-distilroberta-v1",
+                                                           "paraphrase-MiniLM-L6-v2",
+                                                           "paraphrase-albert-small-v2",
+                                                           "sentence-transformers/all-MiniLM-L12-v2",
+                                                           "all-mpnet-base-v2"])
+  return selected_data_model
 # MODEL and TOKENIZER
 checkpoint = "LaMini-Flan-T5-248M"
 tokenizer = T5Tokenizer.from_pretrained(checkpoint)
@@ -50,24 +58,12 @@ def LLM_Pipeline(filepath):
   return result
 
 
-def summarize_and_display_result():
-  uploaded_file = st.file_uploader("Upload your PPTX File", type=['pptx'])
-  if uploaded_file is not None:
-    if st.button("Summarize"):
-
-      filepath = "data/"+uploaded_file.name
-      with open(filepath, 'wb') as temp_file:
-        temp_file.write(uploaded_file.read())
 
 
-        st.info("Here is your PPTX Summarization")
-        summary = LLM_Pipeline(filepath)
-        st.success(summary)
 
 def all_data_models_summarizer():
-  # selected_data_model = data_models()
-  #
-  # model = SentenceTransformer(selected_data_model)
+  model = SentenceTransformer("all-distilroberta-v1")
+
   def extract_text_from_ppt(ppt_file):
     presentation = Presentation(ppt_file)
     text = []
@@ -152,6 +148,22 @@ def all_data_models_summarizer():
       st.write(full_summary)
 
     with tab2:
+      selected_data_model = data_models()
+      if selected_data_model == "LaMini-Flan-T5-248M":
+        st.write("You have selected LaMini-Flan-T5-248M")
+        # summarize_and_display_result()
+      elif selected_data_model == "all-MiniLM-L6-v2":
+        st.write("You have selected all-MiniLM-L6-v2")
+      elif selected_data_model == "all-distilroberta-v1":
+        st.write("You have selected all-distilroberta-v1")
+      elif selected_data_model == "paraphrase-MiniLM-L6-v2":
+        st.write("You have selected paraphrase-MiniLM-L6-v2")
+      elif selected_data_model == "paraphrase-albert-small-v2":
+        st.write("You have selected paraphrase-albert-small-v2")
+      elif selected_data_model == "sentence-transformers/all-MiniLM-L12-v2":
+        st.write("You have selected sentence-transformers/all-MiniLM-L12-v2")
+      elif selected_data_model == "all-mpnet-base-v2":
+        st.write("You have selected all-mpnet-base-v2")
 
       # Topic based summarisation
       topic = st.selectbox('Choose a topic to summarise', ['Select a topic...'] + list(topic_keywords.keys()))
@@ -164,44 +176,15 @@ def all_data_models_summarizer():
           else:
             topic_summary = summarise_text(topic_text)
             st.write(topic_summary)
-def data_models():
-    selected_data_model = st.selectbox("Choose Data Model", ["all-MiniLM-L6-v2",
-                                                             "LaMini-Flan-T5-248M",
-                                                             "all-distilroberta-v1",
-                                                             "paraphrase-MiniLM-L6-v2",
-                                                             "paraphrase-albert-small-v2",
-                                                             "sentence-transformers/all-MiniLM-L12-v2",
-                                                             "all-mpnet-base-v2"])
-    return selected_data_model
+
 def main():
   st.title('Legal-Pythia')
   st.subheader('Online PPTX Summarizer')
 
-  selected_data_model= data_models()
+  all_data_models_summarizer()
 
-  if selected_data_model == "LaMini-Flan-T5-248M":
-    st.write("You have selected LaMini-Flan-T5-248M")
-    summarize_and_display_result()
-  elif selected_data_model == "all-MiniLM-L6-v2":
-    st.write("You have selected all-MiniLM-L6-v2")
 
-    # summarize_and_display_result()
-    all_data_models_summarizer()
-  elif selected_data_model == "all-distilroberta-v1":
-    st.write("You have selected all-distilroberta-v1")
-    all_data_models_summarizer()
-  elif selected_data_model == "paraphrase-MiniLM-L6-v2":
-    st.write("You have selected paraphrase-MiniLM-L6-v2")
-    all_data_models_summarizer()
-  elif selected_data_model == "paraphrase-albert-small-v2":
-    st.write("You have selected paraphrase-albert-small-v2")
-    all_data_models_summarizer()
-  elif selected_data_model == "sentence-transformers/all-MiniLM-L12-v2":
-    st.write("You have selected sentence-transformers/all-MiniLM-L12-v2")
-    all_data_models_summarizer()
-  elif selected_data_model == "all-mpnet-base-v2":
-    st.write("You have selected all-mpnet-base-v2")
-    all_data_models_summarizer()
+
 
 
 
