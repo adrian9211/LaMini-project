@@ -1,7 +1,6 @@
 import base64
 import streamlit as st
 import torch
-import streamlit_shadcn_ui as ui
 from pptx import Presentation
 from transformers import T5ForConditionalGeneration
 from transformers import T5Tokenizer
@@ -56,9 +55,6 @@ def LLM_Pipeline(filepath):
   result = pipeline_summarizer(input_pptx)
   result = result[0]['summary_text']
   return result
-
-
-
 
 
 def all_data_models_summarizer():
@@ -181,13 +177,8 @@ def main():
   st.title('Legal-Pythia')
   st.subheader('Online PPTX Summarizer')
 
+  # Main body
   all_data_models_summarizer()
-
-
-
-
-
-
 
 if __name__ == "__main__":
   main()

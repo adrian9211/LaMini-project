@@ -127,3 +127,5 @@ cython_debug/
 .idea/
 .vscode/
 /.idea/
+
+/pdf_outputs/
