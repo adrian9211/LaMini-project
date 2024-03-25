@@ -19,9 +19,9 @@ def data_models():
                                                            "all-mpnet-base-v2"])
   return selected_data_model
 # MODEL and TOKENIZER
-checkpoint = "LaMini-Flan-T5-248M"
-tokenizer = T5Tokenizer.from_pretrained(checkpoint)
-base_model = T5ForConditionalGeneration.from_pretrained(checkpoint, device_map='auto', torch_dtype=torch.float32)
+# checkpoint = "LaMini-Flan-T5-248M"
+# tokenizer = T5Tokenizer.from_pretrained(checkpoint)
+# base_model = T5ForConditionalGeneration.from_pretrained(checkpoint, device_map='auto', torch_dtype=torch.float32)
 
 #File Loader and Preprocessing
 def file_processing(file):
@@ -43,18 +43,18 @@ def extract_text_from_ppt(ppt_file):
   return "\n".join(text)
 
 #LLM pipeline
-def LLM_Pipeline(filepath):
-  pipeline_summarizer = pipeline(
-    'summarization',
-    model = base_model,
-    tokenizer = tokenizer,
-    max_length = 152,
-    min_length = 25
-  )
-  input_pptx = file_processing(filepath)
-  result = pipeline_summarizer(input_pptx)
-  result = result[0]['summary_text']
-  return result
+# def LLM_Pipeline(filepath):
+#   pipeline_summarizer = pipeline(
+#     'summarization',
+#     model = base_model,
+#     tokenizer = tokenizer,
+#     max_length = 152,
+#     min_length = 25
+#   )
+#   input_pptx = file_processing(filepath)
+#   result = pipeline_summarizer(input_pptx)
+#   result = result[0]['summary_text']
+#   return result
 
 
 def all_data_models_summarizer():
